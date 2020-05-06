@@ -1,6 +1,6 @@
 import { IImpressionEventInput, IInteractEventEdata} from '@sunbird/telemetry';
 import { ResourceService, ConfigService, NavigationHelperService, ToasterService } from '@sunbird/shared';
-import { ProgramsService, PublicDataService, UserService, FrameworkService, ActionService } from '@sunbird/core';
+import { ProgramsService, PublicDataService, UserService, FrameworkService, ActionService, NotificationService } from '@sunbird/core';
 import { Component, OnInit, AfterViewInit, ViewChild, OnDestroy } from '@angular/core';
 import * as _ from 'lodash-es';
 import { ActivatedRoute, Router, NavigationStart } from '@angular/router';
@@ -70,9 +70,9 @@ export class ListContributorTextbooksComponent implements OnInit, AfterViewInit,
   private activatedRoute: ActivatedRoute, private router: Router, public programStageService: ProgramStageService,
   private navigationHelperService: NavigationHelperService,  private httpClient: HttpClient,
   public toasterService: ToasterService, public actionService: ActionService,
-  private collectionHierarchyService: CollectionHierarchyService) { }
+  private collectionHierarchyService: CollectionHierarchyService,
+  private notificationService: NotificationService) { }
   showNominateModal = false;
-
 
   ngOnInit() {
     this.programId = this.activatedRoute.snapshot.params.programId;
@@ -315,6 +315,13 @@ export class ListContributorTextbooksComponent implements OnInit, AfterViewInit,
        }
       }
      this.programsService.updateNomination(req).subscribe((res) => {
+      this.contributor.nominationData.status = nominationStatus;
+      this.contributor.nominationData.programData = this.programDetails;
+       this.notificationService.onAfterNominationUpdate(this.contributor.nominationData)
+       .subscribe(
+         response => { },
+         error => console.log(error)
+       );
        this.showRequestChangesPopup = false;
       //  setTimeout(() => {
       //    this.router.navigate(['/sourcing/nominations/' + this.programId]);
